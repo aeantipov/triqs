@@ -354,7 +354,7 @@ def parse(filename, debug, compiler_options, where_is_libclang, analyze_filter):
       for err in errors :
         loc = err.location
         s += '\n'.join(["file %s line %s col %s"%(loc.file, loc.line, loc.column), err.spelling])
-      raise RuntimeError, s + "\n... Your code must compile before making the wrapper !"
+      raise RuntimeError, s + "\n... Your code must compile before using clang-parser !"
 
   # Analyze the AST to extract classes and functions
   functions, classes = build_functions_and_classes(translation_unit.cursor, analyze_filter)

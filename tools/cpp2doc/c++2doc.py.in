@@ -25,12 +25,13 @@ parser.add_argument('--libclang_location', help='Location of the libclang', defa
 parser.add_argument('--compiler_options', nargs ='*', help='Options to pass to clang')
 parser.add_argument('--includes', '-I', action='append',  help='Includes to pass to clang')
 parser.add_argument('--namespace', '-N', action='append',  help='namespaces to document', default= ['triqs']) #specify which namespaces to document, e.g. -N triqs -N applications
+parser.add_argument('--mako_location', help="Internal use: location of mako files", default = '')
 
 args = parser.parse_args()
 args.includes = (args.includes or []) +  '@TRIQS_INCLUDE_ALL@'.split(';')
 
 triqs_install_location = '@CMAKE_INSTALL_PREFIX@'
-args.includes.insert(0, triqs_install_location + '/include')
+if not args.mako_location: args.includes.insert(0, triqs_install_location + '/include')
 
 #------------
 
@@ -146,8 +147,9 @@ if __name__ == '__main__':
     print "Generating the documentation ..."
 
     # Making the rst files
-    tpl_class = Template(filename=triqs_install_location + '/share/triqs/cpp2doc/mako/xxx_doc_class.rst')
-    tpl_fun = Template(filename=triqs_install_location + '/share/triqs/cpp2doc/mako/xxx_doc_function.rst')
+    mako_location =  args.mako_location or (triqs_install_location + '/share/triqs/')
+    tpl_class = Template(filename=mako_location + '/cpp2doc/mako/xxx_doc_class.rst')
+    tpl_fun = Template(filename=mako_location + '/cpp2doc/mako/xxx_doc_function.rst')
     for c in classes:
         if not c.doc: continue
 
