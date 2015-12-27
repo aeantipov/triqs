@@ -90,7 +90,7 @@ def grab_from_doc (doc, var1, var2):
 
 def process_doc_function(f): 
     """Process the doc of the function f"""
-    f.brief_doc = f.doc.split('\n',1)[0]
+    f.brief_doc = replace_latex(f.doc.split('\n',1)[0])
     f.doc_elements, f.processed_doc = grab_from_doc(replace_latex(f.doc), ['include', 'return', 'synopsis', 'warning', 'note'],['param', 'tparam'])
     
 def process_doc_class(c): 
@@ -102,9 +102,15 @@ def regroup_func_by_names(constructors, *f_list_list):
     """ Given a list of functions, regroup them by names"""
     d = OrderedDict()
     if constructors: d['constructor'] = constructors
+    def decay(name):
+        if 'operator' not in name : return name
+        a, ca, c, co = '+ - * /',  '+= -= *= /=',  "== !=",  r" comparison"
+        d = {'*=' : ca,'+=' : ca,'/=' : ca,'-=' : ca,'*' : a,'+' : a,'/' : a,'-' : a, '==': c, '!=' : c, '<': co, '>' : co, '<=' : co, '>=' : co}
+        n = name.replace('operator','').strip()
+        return 'operator' + d[n] if n in d else name 
     for f_list in f_list_list:
         for f in f_list:
-            if f.doc: d.setdefault(f.name,[]).append(f)
+            d.setdefault(decay(f.name),[]).append(f)
     return d
 
 def render(template, output_name, **d):
@@ -137,9 +143,10 @@ if __name__ == '__main__':
     if add_opts:
         compiler_options += add_opts.split()
 
-    functions, classes = parse(args.filename, debug = False, compiler_options = compiler_options, 
+    functions, classes = parse(args.filename, debug = True, compiler_options = compiler_options, 
                where_is_libclang = args.libclang_location, 
-               analyze_filter = lambda c, ns: c.raw_comment and all([x in ns for x in args.namespace]))
+               #analyze_filter = lambda c, ns: all([x in ns for x in args.namespace]))
+               analyze_filter = lambda c, ns: (c.raw_comment or 'operator' in c.spelling) and all([x in ns for x in args.namespace]))
     #return namespaces and namespaces[0] in [ 'triqs', 'TEST'] and 
     #c.spelling in ["array"] or c.location.file.name == sys.argv[1]
     #return "triqs" in namespaces or c.location.file.name == sys.argv[1]
