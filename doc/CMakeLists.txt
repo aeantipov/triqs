@@ -69,8 +69,8 @@ add_subdirectory(tutorials/)
 add_subdirectory(tour/)
 
 # use c++2doc to automatically build the documentation of C++  
-option(Doc_Use_cpp2doc "Use c++2doc to generate C++ documentation of triqs classes and functions (requires libclang)" ON)
-if (Doc_Use_cpp2doc)
+option(DocWithCpp2doc "Use c++2doc to generate C++ documentation of triqs classes and functions (requires libclang)" ON)
+if (DocWithCpp2doc)
 add_custom_command (OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/triqs DEPENDS ${DOXYGEN_SOURCES} COMMAND export PYTHONPATH=\$PYTHONPATH:${CMAKE_BINARY_DIR}/tools/cpp2doc/mako && ${PYTHON_INTERPRETER} ${CMAKE_BINARY_DIR}/tools/c++2doc.py ${CMAKE_CURRENT_SOURCE_DIR}/reference/all_triqs.hpp --includes=${CMAKE_SOURCE_DIR}/ --includes=${CMAKE_BINARY_DIR}/Config --compiler_options="-DTRIQS_BUILDING_LIBRARY" --mako_location=${CMAKE_SOURCE_DIR}/tools/ )#>& cpp2py.log) 
 add_custom_target(docs_cpp2doc ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/triqs)
 add_dependencies(docs_sphinx docs_cpp2doc) # we must have t sall the sources before building

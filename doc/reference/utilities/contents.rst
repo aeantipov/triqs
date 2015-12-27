@@ -7,6 +7,7 @@ Utilities: exceptions, tuple-tools, etc.
    :maxdepth: 1
    :numbered:
 
+   time_pt    
    exceptions
    factory
    tupletools
