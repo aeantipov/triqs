@@ -1,5 +1,5 @@
 
-# Should we use MathJax....
+# MathJax
 find_package(MathJax)
 if (MATHJAX_PATH) 
  message(STATUS "Detected MathJax at ${MATHJAX_PATH}")
@@ -9,7 +9,6 @@ else()
  option(Sphinx_Math_Generator_MathJax " " OFF)
  set(MATHJAX_PATH "MathJax" CACHE STRING "Path to the MathJax directory") 
 endif()
-
 if (Sphinx_Math_Generator_MathJax)
  set(SPHINX_MATH_GENERATOR "mathjax")
  message(STATUS "Using MathJax")
@@ -34,12 +33,28 @@ include(${TRIQS_SOURCE_DIR}/cmake/BuildSphinx.cmake)
 include_directories( ${CMAKE_SOURCE_DIR} )
 
 #set( link_libs " ${TRIQS_LIBRARY_ALL}")
-SET( link_libs ${LAPACK_LIBS} ) # ${BOOST_LIBRARY} )
+SET( link_libs ${LAPACK_LIBS} ) 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
  list (REMOVE_DUPLICATES link_libs)
 ENDIF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 link_libraries( ${link_libs} triqs)
 
+# doc depends on lib and and on all python modules (because they  may be loaded in examples).
+add_dependencies(docs_sphinx triqs)
+GET_PROPERTY(PYTHON_DYNAMIC_MODULES_LIST GLOBAL PROPERTY PYTHON_DYNAMIC_MODULES_LIST)
+foreach (mod ${PYTHON_DYNAMIC_MODULES_LIST})
+ add_dependencies(docs_sphinx ${mod})
+endforeach (mod ${PYTHON_DYNAMIC_MODULES_LIST})
+
+# Create a temporary copy of the doc that will be completed by the automatically generated one.
+FILE(GLOB_RECURSE all_rst_files RELATIVE ${CMAKE_SOURCE_DIR}/doc *.rst _* *.py *.cpp)
+SET(rst_copy_tar  ${CMAKE_CURRENT_BINARY_DIR}/rst_copy.tar)
+add_custom_command (OUTPUT ${rst_copy_tar} DEPENDS ${all_rst_files}
+ COMMAND cd ${CMAKE_SOURCE_DIR}/doc && tar cf ${rst_copy_tar} ${all_rst_files} && cd ${CMAKE_BINARY_DIR}/doc && tar xf ${rst_copy_tar} )
+add_custom_target(rst_copy DEPENDS ${rst_copy_tar})
+add_dependencies(docs_sphinx rst_copy) # we must first have copied the sources
+
+# Build C++ examples ...
 macro(all_examples)
 FILE(GLOB ExampleList RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 FOREACH(example ${ExampleList}) 
@@ -49,51 +64,17 @@ FOREACH(example ${ExampleList})
 ENDFOREACH()
 endmacro()
 
-
-# Create a temporary copy of the doc that will be completed by the automatically generated one.
-FILE(GLOB_RECURSE all_rst_files RELATIVE ${CMAKE_SOURCE_DIR}/doc *.rst _* *.py )
-SET(rst_copy_tar  ${CMAKE_BINARY_DIR}/rst_copy.tar)
-add_custom_command (OUTPUT ${rst_copy_tar} DEPENDS ${all_rst_files}
- COMMAND cd ${CMAKE_SOURCE_DIR}/doc && tar cf ${rst_copy_tar} ${all_rst_files} && cd ${CMAKE_BINARY_DIR}/doc && tar xf ${rst_copy_tar} )
-add_custom_target(rst_copy ALL DEPENDS ${rst_copy_tar})
-
-
-# Dive and find the doxygen sources
 add_subdirectory(reference/)
 add_subdirectory(tutorials/)
 add_subdirectory(tour/)
 
-# Build the doxygen 
-set(DOXYGEN_HTML_OUTPUT ./html/doxy_triqs)
-find_package(Doxygen REQUIRED)
-get_property(DOXYGEN_SOURCES GLOBAL PROPERTY DOXYGEN_SOURCES)
-string(REPLACE ";" "  " DOXYGEN_SOURCES_LIST "${DOXYGEN_SOURCES}")
-#message(STATUS "Doxygen sources are ${DOXYGEN_SOURCES}") 
-
-
-# Set dependencies
-GET_PROPERTY(PYTHON_DYNAMIC_MODULES_LIST GLOBAL PROPERTY PYTHON_DYNAMIC_MODULES_LIST)
-foreach (mod ${PYTHON_DYNAMIC_MODULES_LIST})
- add_dependencies(docs_sphinx ${mod})
-endforeach (mod ${PYTHON_DYNAMIC_MODULES_LIST})
-
-
-set(doxy_top ${CMAKE_CURRENT_BINARY_DIR}/doxy.log)
-add_custom_command (OUTPUT ${doxy_top} DEPENDS ${DOXYGEN_SOURCES} COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile > ${doxy_top} )
-add_custom_target(docs_doxy ALL DEPENDS ${doxy_top})
-
+# use c++2doc to automatically build the documentation of C++  
 option(Doc_Use_cpp2doc "Use c++2doc to generate C++ documentation of triqs classes and functions (requires libclang)" ON)
-
 if (Doc_Use_cpp2doc)
-# automatically generated doc by c++2py)
 add_custom_command (OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/triqs DEPENDS ${DOXYGEN_SOURCES} COMMAND export PYTHONPATH=\$PYTHONPATH:${CMAKE_BINARY_DIR}/tools/cpp2doc/mako && ${PYTHON_INTERPRETER} ${CMAKE_BINARY_DIR}/tools/c++2doc.py ${CMAKE_CURRENT_SOURCE_DIR}/reference/all_triqs.hpp --includes=${CMAKE_SOURCE_DIR}/ --includes=${CMAKE_BINARY_DIR}/Config --compiler_options="-DTRIQS_BUILDING_LIBRARY" --mako_location=${CMAKE_SOURCE_DIR}/tools/ )#>& cpp2py.log) 
 add_custom_target(docs_cpp2doc ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/triqs)
-add_dependencies(docs_sphinx docs_cpp2doc) # we must first have doxygen process the sources to link to them
+add_dependencies(docs_sphinx docs_cpp2doc) # we must have t sall the sources before building
 endif()
-
-add_dependencies(docs_sphinx rst_copy) # we must first have copied the sources
-add_dependencies(docs_sphinx docs_doxy) # we must first have doxygen process the sources to link to them
-add_dependencies(docs_sphinx triqs)
 
 # Install
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ COMPONENT documentation DESTINATION share/doc/triqs
@@ -119,9 +100,4 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/ COMPONENT documentation DEST
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/themes/agogo DESTINATION share/triqs/themes)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/themes/triqs DESTINATION share/triqs/themes)
 
-# PDF documentation
-if (Build_PDF_Documentation)
- add_dependencies(docs_sphinx_pdf triqs )
- install(FILES ${sphinx_top_pdf} DESTINATION share/doc/triqs/)
-endif()
 
