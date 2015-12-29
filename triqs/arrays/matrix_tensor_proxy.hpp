@@ -25,6 +25,8 @@
 namespace triqs {
 namespace arrays {
 
+ // useless .... cf c++/match.cpp ex
+ // make 4 class with mako
  template <class T> struct _remove_rvalue_ref {
   typedef T type;
  };

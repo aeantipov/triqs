@@ -1,5 +1,5 @@
 from mako.template import Template
-import sys
+import sys,os
 
 # --- Parsing the arguments of the script and options
 import argparse
@@ -17,7 +17,10 @@ args = parser.parse_args()
 output = args.outputname or args.filename.replace(r'.mako','')
 tpl = Template(filename=args.filename)
 rendered = tpl.render().strip()
-print rendered
-with open(output,'w') as f:
-    f.write(rendered)
 
+with open('.'+ output,'w') as out : 
+    out.write(rendered)
+
+# clang formatting
+os.system('/usr/local/opt/llvm/bin/clang-format -style=file .%s >%s'%(output,output))
+os.system(' rm .%s'%output)
