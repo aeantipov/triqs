@@ -56,6 +56,7 @@ namespace gfs {
    */
   template <typename S> void reset(S const &s) { _init(s, zero); }
 
+
   /*friend void h5_write(h5::group fg, std::string const &subgroup_name, tail_zero const &t) {
    auto gr = fg.create_group(subgroup_name);
    h5_write(gr, "zero", t.zero);
@@ -88,6 +89,8 @@ namespace gfs {
   template<typename S> void _init(S const & s, matrix<dcomplex> & z) { z.resize(s); z()=0;} 
   template<typename S, int R> void _init(S const & s, array<dcomplex,R> & z) { z.resize(s); z()=0;} 
  };
+
+ template <typename R, typename... T> tail_zero<R> slice_target(tail_zero<R>, T...) { return tail_zero<R>(); }
 
  template<int ... pos, typename T, typename ...X> nothing partial_eval_linear_index(tail_zero<T>, X&&...) { return {};}
 
