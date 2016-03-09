@@ -23,6 +23,7 @@
 #include <triqs/arrays/blas_lapack/gelss.hpp>
 
 namespace triqs { namespace gfs { 
+ using triqs::arrays::array_const_view;
 
  /// routine for fitting the tail (singularity) of a Matsubara Green's function
  /**
@@ -77,4 +78,7 @@ namespace triqs { namespace gfs {
   @note Based on [[fit_tail_impl]]
  */
  void fit_tail(gf_view<imfreq, scalar_valued> gf, tail_view known_moments, int max_moment, int n_min, int n_max, bool replace_by_fit = false) ;
+
+ ///fit tail of tensor_valued Gf, rank 3
+ array<triqs::gfs::tail, 3> fit_tail(gf_const_view<imfreq, tensor_valued<3>> g, array_const_view<triqs::gfs::tail,3> known_moments, int max_moment, int n_min, int n_max);
 }} // namespace
