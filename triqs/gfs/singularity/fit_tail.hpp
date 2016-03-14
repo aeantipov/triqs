@@ -80,5 +80,18 @@ namespace triqs { namespace gfs {
  void fit_tail(gf_view<imfreq, scalar_valued> gf, tail_view known_moments, int max_moment, int n_min, int n_max, bool replace_by_fit = false) ;
 
  ///fit tail of tensor_valued Gf, rank 3
- array<triqs::gfs::tail, 3> fit_tail(gf_const_view<imfreq, tensor_valued<3>> g, array_const_view<triqs::gfs::tail,3> known_moments, int max_moment, int n_min, int n_max);
+ template<typename S>
+ array<triqs::gfs::tail, 3> fit_tail(gf_const_view<imfreq, tensor_valued<3>,S> g, array_const_view<triqs::gfs::tail,3> known_moments, int max_moment, int n_min, int n_max){
+
+  gf<imfreq, scalar_valued> g_scal(g.mesh());
+  array<triqs::gfs::tail, 3> tail(known_moments.shape());
+  for(int u=0;u<known_moments.shape()[0];u++) 
+   for(int v=0;v<known_moments.shape()[1];v++) 
+    for(int w=0;w<known_moments.shape()[2];w++) {
+     for(auto const & om : g_scal.mesh()) g_scal[om] = g[om](u,v,w);
+     fit_tail(g_scal,known_moments(u,v,w), max_moment, n_min, n_max);
+     tail(u,v,w) = g_scal.singularity();
+    }
+  return tail;
+ }
 }} // namespace
