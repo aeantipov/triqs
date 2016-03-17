@@ -46,10 +46,10 @@ namespace triqs { namespace gfs {
   @param gf the input gf<imfreq> Green's function
   @param known_moments the known moments in the form of a tail(_view)
   @param max_moment the highest fitted moment and the highest moment in the tail after the fit: max_moment
-  @param n_min the Matsubara index of the first frequency to fit
-  @param n_max the Matsubara index of the last frequency to fit (included)
-  @param replace_by_fit if true, replace the gf data from n_min to the last index of the mesh by the asymptotic behavior obtained by fitting the tails
-  @note Based on [[fit_tail_impl]]
+  @param n_min the Matsubara index of the first frequency to fit (can be positive or negative)
+  @param n_max the Matsubara index of the last frequency to fit (included) (can be positive or negative)
+  @param replace_by_fit if true, replace the gf data from n_min to the last index of the mesh by the asymptotic behavior obtained by fitting the tails (for negative frequencies, the data is replaced from the first index to nmax)
+  @note Based on [[fit_tail_impl]]. Works for functions with positive only or all Matsubara frequencies.
  */
  void fit_tail(gf_view<imfreq> gf, tail_view known_moments, int max_moment, int n_min, int n_max,
    bool replace_by_fit = false) ;
