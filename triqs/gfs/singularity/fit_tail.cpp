@@ -97,7 +97,7 @@ namespace triqs { namespace gfs {
   gf.singularity() = fit_tail_impl(gf, known_moments, max_moment, n_min, n_max);
   if (replace_by_fit) { // replace data in the fitting range by the values from the fitted tail
    for (auto iw : gf.mesh()) {
-    if ((iw.n >= n_min and iw.n>0) or (iw.n <= n_max and iw.n<0)) gf[iw] = evaluate(gf.singularity(), iw);
+    if ((iw.n >= n_min and iw.n>0 and n_min>0) or (iw.n <= n_max and iw.n<0 and n_min<0)) gf[iw] = evaluate(gf.singularity(), iw);
    }
    }
   }
