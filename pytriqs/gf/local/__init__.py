@@ -39,6 +39,6 @@ __all__ = ['Omega','iOmega_n','SemiCircular','Wilson','Fourier','InverseFourier'
            'GfReTime', 'MeshReTime',
            'GfLegendre', 'MeshLegendre',
            'make_gf_from_inverse_fourier',
-           'BlockGf','inverse',
+           'BlockGf','inverse','is_gf_real_in_tau',
            'delta','dyson','tail_fit',
            'rebinning_tau']

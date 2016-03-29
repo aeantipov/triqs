@@ -457,6 +457,8 @@ g.number_protocol['subtract'].add_overload(calling_pattern = "-", signature = "g
 
 module.add_class(g)
 
+module.add_function("bool is_gf_real_in_tau(gf_view<imfreq, matrix_valued> g, double tolerance = 1.e-13)")
+
 #############################
 ##   Tensor-valued Gfs [ImFreq, ImTime, ReFreq]
 ##############################
