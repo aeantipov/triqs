@@ -96,8 +96,9 @@ namespace triqs { namespace gfs {
   if (get_target_shape(gf) != known_moments.shape()) TRIQS_RUNTIME_ERROR << "shape of tail does not match shape of gf";
   gf.singularity() = fit_tail_impl(gf, known_moments, max_moment, n_min, n_max);
   if (replace_by_fit) { // replace data in the fitting range by the values from the fitted tail
+   bool is_real = is_gf_real_in_tau(gf);
    for (auto iw : gf.mesh()) {
-    if ((iw.n >= n_min and iw.n>0 and n_min>0) or (iw.n <= n_max and iw.n<0 and n_min<0)) gf[iw] = evaluate(gf.singularity(), iw);
+    if ((iw.n >= n_min and iw.n>0 and n_min>0) or (!is_real and iw.n <= n_max and iw.n<0 and n_min<0) or (is_real and iw.n<=-n_min-(gf.mesh().domain().statistic==Fermion? 1 : 0) and iw.n<0)) gf[iw] = evaluate(gf.singularity(), iw);
    }
    }
   }

@@ -34,7 +34,7 @@ namespace triqs { namespace gfs {
   @param gf the input gf<imfreq> Green's function
   @param known_moments the known moments in the form of a tail(_view)
   @param max_moment the highest fitted moment and the highest moment in the tail after the fit: max_moment
-  @param n_min the index of the first frequency to fit
+  @param n_min the index of the first frequency to fit (included)
   @param n_max the index of the last frequency to fit (included)
 
   @return the tail obtained by fitting
@@ -48,7 +48,17 @@ namespace triqs { namespace gfs {
   @param max_moment the highest fitted moment and the highest moment in the tail after the fit: max_moment
   @param n_min the Matsubara index of the first frequency to fit (can be positive or negative)
   @param n_max the Matsubara index of the last frequency to fit (included) (can be positive or negative)
-  @param replace_by_fit if true, replace the gf data from n_min to the last index of the mesh by the asymptotic behavior obtained by fitting the tails (for negative frequencies, the data is replaced from the first index to nmax)
+  @param replace_by_fit if true, replace the gf data with the asymptotic behavior obtained by fitting the tails.
+  Range of replacement if replace_by_fit is true:
+  
+  - if the gf is real in tau, replace all frequencies w_n>= w_{n_min} and w_n <= - w_{n_min} 
+
+  - otherwise, 
+
+        -if n_min>0 (and n_max>0), replace all frequencies w_n >= w_n{n_min}
+        
+        -if n_min<0 (and n_max<0), replace all frequencies w_n <= w_n{n_max}
+
   @note Based on [[fit_tail_impl]]. Works for functions with positive only or all Matsubara frequencies.
  */
  void fit_tail(gf_view<imfreq> gf, tail_view known_moments, int max_moment, int n_min, int n_max,
@@ -59,9 +69,18 @@ namespace triqs { namespace gfs {
   @param gf the input Green's function
   @param known_moments the known moments in the form of a tail(_view)
   @param max_moment the highest fitted moment and the highest moment in the tail after the fit: max_moment
-  @param n_min the Matsubara index of the first frequency to fit
+  @param n_min the Matsubara index of the first frequency to fit (included)
   @param n_max the Matsubara index of the last frequency to fit (included)
-  @param replace_by_fit if true, replace the gf data from n_min to the last index of the mesh by the asymptotic behavior obtained by fitting the tails
+  @param replace_by_fit if true, replace the gf data with the asymptotic behavior obtained by fitting the tails.
+  Range of replacement if replace_by_fit is true:
+  
+  - if the gf is real in tau, replace all frequencies w_n>= w_{n_min} and w_n <= - w_{n_min} 
+
+  - otherwise, 
+
+        -if n_min>0 (and n_max>0), replace all frequencies w_n >= w_n{n_min}
+        
+        -if n_min<0 (and n_max<0), replace all frequencies w_n <= w_n{n_max}
   @note Based on [[fit_tail_impl]]
  */
  void fit_tail(gf_view<block_index, gf<imfreq>> block_gf, tail_view known_moments, int max_moment, int n_min,
@@ -72,9 +91,18 @@ namespace triqs { namespace gfs {
   @param gf the input gf<imfreq> Green's function
   @param known_moments the known moments in the form of a tail(_view)
   @param max_moment the highest fitted moment and the highest moment in the tail after the fit: max_moment
-  @param n_min the Matsubara index of the first frequency to fit
+  @param n_min the Matsubara index of the first frequency to fit (included)
   @param n_max the Matsubara index of the last frequency to fit (included)
-  @param replace_by_fit if true, replace the gf data from n_min to the last index of the mesh by the asymptotic behavior obtained by fitting the tails
+  @param replace_by_fit if true, replace the gf data with the asymptotic behavior obtained by fitting the tails.
+  Range of replacement if replace_by_fit is true:
+  
+  - if the gf is real in tau, replace all frequencies w_n>= w_{n_min} and w_n <= - w_{n_min} 
+
+  - otherwise, 
+
+        -if n_min>0 (and n_max>0), replace all frequencies w_n >= w_n{n_min}
+        
+        -if n_min<0 (and n_max<0), replace all frequencies w_n <= w_n{n_max}
   @note Based on [[fit_tail_impl]]
  */
  void fit_tail(gf_view<imfreq, scalar_valued> gf, tail_view known_moments, int max_moment, int n_min, int n_max, bool replace_by_fit = false) ;
