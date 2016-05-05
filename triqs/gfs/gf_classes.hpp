@@ -20,13 +20,13 @@
  ******************************************************************************/
 #pragma once
 
-#include "./impl/defs.hpp"
-#include "./impl/gf.hpp"
-#include "./impl/gf_view.hpp"
-#include "./impl/gf_const_view.hpp"
-#include "./impl/misc.hpp"
-#include "./impl/gf_expr.hpp"
-#include "./impl/functions.hpp"
+#include <triqs/gfs/impl/defs.hpp>
+#include <triqs/gfs/impl/gf.hpp>
+#include <triqs/gfs/impl/gf_view.hpp>
+#include <triqs/gfs/impl/gf_const_view.hpp>
+#include <triqs/gfs/impl/misc.hpp>
+#include <triqs/gfs/impl/gf_expr.hpp>
+#include <triqs/gfs/impl/functions.hpp>
 
 #include "./singularity/no_tail.hpp"
 
