@@ -175,11 +175,5 @@ namespace gfs {
   }
  };
 
-  // no evaluator for lambda_valued
- template <typename F, typename Sing> struct gf_evaluator<imfreq, lambda_valued<F>, Sing> {
-  static constexpr int arity = 1;//needed to compile
-  template <typename G> gf_evaluator(G *) {};
- };
-
 }
 }

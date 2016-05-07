@@ -20,24 +20,12 @@
  ******************************************************************************/
 #pragma once
 #include "./product.hpp"
+#include <triqs/gfs/gf_curried_view.hpp>
+#include <triqs/gfs/gf_curried_const_view.hpp>
 namespace triqs { namespace gfs { 
-
- template <typename Var, typename M, typename L> gf_view<Var, lambda_valued<L>> make_gf_view_lambda_valued(M m, L l) {
-  return {std::move(m), l, nothing(), nothing(), {}};
- }
 
  // simplify the code below ...
  template <typename... Ms> struct cartesian_product<std::tuple<Ms...>> : cartesian_product<Ms...> {};
-
- /// ---------------------------  data access  ---------------------------------
-
- template <typename F, typename M> struct gf_data_proxy<M, lambda_valued<F>> : data_proxy_lambda<F, false> {};
- template <typename F, typename... Ms>
- struct gf_data_proxy<cartesian_product<Ms...>, lambda_valued<F>> : data_proxy_lambda<F, true> {};
-
- /// ---------------------------  Factories ---------------------------------
-
- template <typename F, typename... Ms> struct gf_data_factory<cartesian_product<Ms...>, lambda_valued<F>, nothing> {};
 
  namespace curry_impl {
 
@@ -97,16 +85,32 @@ namespace triqs { namespace gfs {
   // curry<0>(g) returns : x-> y... -> g(x,y...)
   // curry<1>(g) returns : y-> x,z... -> g(x,y,z...)
 
-  // The implementation (can be overloaded for some types)
+  // The implementation for one variable
   template <int... pos, typename G>
-  auto curry_impl(G g) { // impl function : G is always a view, see call below
+  auto curry_impl1(G g, std::true_type) { // impl function : G is always a view, see call below
    // pick up the meshed corresponding to the curryed variables
    auto meshes_tuple = triqs::tuple::filter<pos...>(g.mesh().components());
    using var_t = cart_prod<triqs::tuple::filter_t<typename G::mesh_t::ms_tuple_t, pos...>>;
    auto m = triqs::tuple::apply_construct<gf_mesh<var_t>>(meshes_tuple);
    auto l = [g](auto&&... x) { using triqs::gfs::partial_eval_linear_index; return partial_eval_linear_index<pos...>(g, std::make_tuple(x...)); };
-   return make_gf_view_lambda_valued<var_t>(m, l);
+   return gf_curried_view<var_t, decltype(l)> (m, l);
   };
+
+  // The implementation for multivariable: the difference is that we pass the tuple of variable
+  template <int... pos, typename G>
+  auto curry_impl1(G g, std::false_type) { // impl function : G is always a view, see call below
+   // pick up the meshed corresponding to the curryed variables
+   auto meshes_tuple = triqs::tuple::filter<pos...>(g.mesh().components());
+   using var_t = cart_prod<triqs::tuple::filter_t<typename G::mesh_t::ms_tuple_t, pos...>>;
+   auto m = triqs::tuple::apply_construct<gf_mesh<var_t>>(meshes_tuple);
+   auto l = [g](auto&& tu) { using triqs::gfs::partial_eval_linear_index; return partial_eval_linear_index<pos...>(g, tu); };
+   return gf_curried_view<var_t, decltype(l)> (m, l);
+  };
+
+  template <int... pos, typename G>
+  auto curry_impl(G &&g) {
+   return curry_impl1<pos...>(std::forward<G>(g), std17::bool_constant<sizeof...(pos) == 1>{});
+  } 
 
   // The user function
   template <int... pos, typename Mesh, typename Target, typename Singularity, typename Evaluator>

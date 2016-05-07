@@ -64,8 +64,6 @@ namespace gfs {
   using value_type = arrays::array<double, R>;
  };
 
- template<typename F> struct lambda_valued {};
- 
  template<typename T> struct _real_target_t_impl;
  template<> struct _real_target_t_impl<scalar_valued> { using type = scalar_real_valued;};
  template<> struct _real_target_t_impl<matrix_valued> { using type = matrix_real_valued;};

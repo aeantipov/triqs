@@ -162,27 +162,5 @@ namespace triqs { namespace gfs {
                                                     // but easy to write if needed at some point.
  };
 
- //---------------------------- lambda ----------------------------------
-
- template <typename F, bool tupleargs> struct data_proxy_lambda;
- template <typename F> struct data_proxy_lambda<F,false> {
-
-  /// The storage
-  using storage_t = F;
-  using storage_view_t = F;
-  using storage_const_view_t = F;
-
-  /// The data access
-  template <typename S, typename ... I> AUTO_DECL operator()(S& data, I const& ...i) const RETURN(data(i...));
-
-  template<typename S, typename RHS> static void assign_to_scalar   (S & data, RHS && rhs) = delete;
-  template <typename ST, typename RHS> static void rebind(ST& data, RHS&& rhs) = delete;
- };
-
- // If tuple args, flatten the tuple before calling
- template <typename F> struct data_proxy_lambda<F, true> : data_proxy_lambda<F, false> {
-  template <typename S, typename Tu> AUTO_DECL operator()(S& data, Tu const& tu) const RETURN(tuple::apply(data,tu));
- };
-
 }}
 

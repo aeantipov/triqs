@@ -81,6 +81,8 @@ namespace gfs {
   static constexpr bool is_view = ${"true" if 'view' in GRVC else "false"};
   static constexpr bool is_const = ${"true" if GRVC=='const_view' else "false"};
 
+  static constexpr int arity =  get_n_variables<mesh_t>::value;
+  
   // ------------- Accessors -----------------------------
 
   mesh_t const &mesh() const { return _mesh; }
