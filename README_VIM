@@ -1,0 +1,4 @@
+vim setup to see the .mcpp and .mhpp files
+
+:au BufNewFile,BufRead *.m?pp set filetype=cpp
+
