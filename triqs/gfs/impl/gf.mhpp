@@ -24,14 +24,13 @@
  ******************************************************************************/
 #pragma once
 #include <triqs/gfs/impl/defs.hpp>
-//#include <triqs/gfs/impl/misc.hpp>
-//#include <triqs/gfs/impl/gf_expr.hpp>
-//#include <triqs/gfs/impl/functions.hpp>
-<%block name="includes"/>
 
 namespace triqs {
 namespace gfs {
 
+ /**
+  * ${GF} : the main class
+  */
  template <typename Mesh, typename Target, typename Singularity, typename Evaluator>
  class ${GF} : TRIQS_CONCEPT_TAG_NAME(ImmutableGreenFunction) {
 

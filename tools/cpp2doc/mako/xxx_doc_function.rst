@@ -28,7 +28,7 @@ ${tools.make_synopsis_list(f_overloads)}
 
 %for n,m in enumerate(f_overloads) :
 
----------------------------------------
+..  ---------------------------------------
 
 %if c is None :
 
