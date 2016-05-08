@@ -79,11 +79,7 @@ namespace gfs {
   }
 
   /// evaluation
-  template <typename F> auto evaluate(interpol_t::Linear1d, F const &f, double x) const 
-#ifdef TRIQS_CPP11 
-  ->decltype(0.0*f[0] + 1.0*f[0]) 
-#endif
-  {
+  template <typename F> auto evaluate(interpol_t::Linear1d, F const &f, double x) const {
    auto id = this->get_interpolation_data(default_interpol_policy{}, x);
    return id.w0 * f[id.i0] + id.w1 * f[id.i1];
   }

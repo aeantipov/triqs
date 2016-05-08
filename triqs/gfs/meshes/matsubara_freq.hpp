@@ -168,13 +168,8 @@ namespace gfs {
   long get_interpolation_data(interpol_t::None, long n) const { return n;}
   long get_interpolation_data(interpol_t::None, matsubara_freq n) const { return n.n;}
  
-#ifndef TRIQS_CPP11 
   template <typename F> auto evaluate(interpol_t::None, F const &f, long n) const { return f[n]; }
   template <typename F> auto evaluate(interpol_t::None, F const &f, matsubara_freq n) const { return f[n.n]; }
-#else
-  template <typename F> auto evaluate(interpol_t::None, F const &f, long n) const RETURN(f[n]);
-  template <typename F> auto evaluate(interpol_t::None, F const &f, matsubara_freq n) const RETURN(f[n.n]);
-#endif
 
   // -------------------- MPI -------------------
 

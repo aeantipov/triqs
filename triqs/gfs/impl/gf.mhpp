@@ -38,16 +38,24 @@ namespace gfs {
   using self_t = ${GF}; // simplify code generation later
   public:
   using mutable_view_type = gf_view<Mesh, Target, Singularity, Evaluator>;
+  
+  /// The associated const view type (gf_const_view <....>)
   using const_view_type = gf_const_view<Mesh, Target, Singularity, Evaluator>;
+ 
+  /// The associated view type (non const)
   using view_type = gf_${GRVC if 'view' in GRVC else 'view'}<Mesh, Target, Singularity, Evaluator>;
+  
+  /// The associated regular type (gf<....>) 
   using regular_type = gf<Mesh, Target, Singularity, Evaluator>;
 
   using variable_t = Mesh;
   using target_t = Target;
   using singularity_def_t = Singularity;
 
+  /// Type of the mesh
   using mesh_t = gf_mesh<Mesh>;  
   using domain_t = typename mesh_t::domain_t;
+  
   using mesh_point_t = typename mesh_t::mesh_point_t;
   using mesh_index_t = typename mesh_t::index_t;
   using linear_mesh_index_t = typename mesh_t::linear_index_t;
@@ -85,12 +93,20 @@ namespace gfs {
   
   // ------------- Accessors -----------------------------
 
+  /// Access the  mesh
   mesh_t const &mesh() const { return _mesh; }
   domain_t const &domain() const { return _mesh.domain(); }
+  
+  /// Direct access to the data array
   data_t &data() { return _data; }
+  /// Const version
   data_t const &data() const { return _data; }
+  
+  /// Access to the singularity
   singularity_t &singularity() { return _singularity; }
+  /// Const version
   singularity_t const &singularity() const { return _singularity; }
+  
   symmetry_t const &symmetry() const { return _symmetry; }
   indices_t const &indices() const { return _indices; }
   //evaluator_t const &get_evaluator() const { return _evaluator; }
@@ -137,7 +153,12 @@ namespace gfs {
 
   public:
 
-  /// Copy
+%if GRVC == 'regular' :
+  /// Construct an empty Green function (with empty array).
+  gf() : _evaluator(this) {} // all arrays of zero size (empty)
+%endif
+
+  /// Copy constructor
   ${GF}(${GF} const &x)
      : _mesh(x.mesh()),
        _data(factory<data_t>(x.data())),
@@ -147,8 +168,8 @@ namespace gfs {
        name(x.name),
        _evaluator(this) {}
 
-  /// Move
-  ${GF}(${GF} &&) = default; // TO BE REWRITTEN ??
+  /// Move constructor
+  ${GF}(${GF} &&) = default; 
 
   void swap_impl(${GF} &b) noexcept {
    using std::swap;
@@ -163,36 +184,36 @@ namespace gfs {
 
 ## ------------------------------------------------  regular class ---------------------------------
 %if GRVC == 'regular' :
-
+ 
   using data_factory = gf_data_factory<Mesh, Target, Singularity>;
   using singularity_factory = gf_singularity_factory<Mesh, Target, Singularity>;
   using target_shape_t = typename data_factory::target_shape_t;
   using aux_t = typename data_factory::aux_t;
 
-  /// Empty gf (with empty array). For regular type concept.
-  gf() : _evaluator(this) {} // all arrays of zero size (empty)
-
-  /// Construct from the data. Using the "pass by value" pattern + move
+  // Construct from the data. Using the "pass by value" pattern + move
   gf(mesh_t m, data_t dat, singularity_t si, symmetry_t s, indices_t ind, std::string name = "")
      : gf(impl_tag{}, std::move(m), std::move(dat), std::move(si), std::move(s), std::move(ind), std::move(name)) {}
 
-  /// Construct from mesh, target_shape, aux (typically a memory order), [indices, name]
-  /// aux is defined in the data_factory
+  // Construct from mesh, target_shape, aux (typically a memory order), [indices, name]
+  // aux is defined in the data_factory
   gf(mesh_t m, target_shape_t shape, aux_t aux, indices_t ind = indices_t{}, std::string name = "")
      : gf(impl_tag{}, std::move(m), data_factory::make(m, shape, aux), singularity_factory::make(m, shape), symmetry_t{}, std::move(ind),
          std::move(name)) {
    if (this->_indices.is_empty()) this->_indices = indices_t(shape);
   }
 
-  /// Construct from mesh, [target shape, indices, name]
-  gf(mesh_t m, target_shape_t shape = target_shape_t{}, indices_t const &ind = indices_t{}, std::string name = "")
-     : gf(impl_tag{}, std::move(m), data_factory::make(m, shape, aux_t{}), singularity_factory::make(m, shape), symmetry_t{}, std::move(ind),
-         std::move(name)) {
+  // NO DOC. Construct from mesh, [target shape, indices, name]
+  gf(mesh_t m, target_shape_t shape, indices_t const &ind, std::string name)
+     : gf(impl_tag{}, std::move(m), data_factory::make(m, shape, aux_t{}), singularity_factory::make(m, shape), symmetry_t{},
+          std::move(ind), std::move(name)) {
    if (this->_indices.is_empty()) this->_indices = indices_t(shape);
   }
 
+  /// Construct from mesh and target shape
+  gf(mesh_t m, target_shape_t shape = target_shape_t{}) : gf(std::move(m), std::move(shape), indices_t{}, std::string{}) {}
+
   /// From a gf_view of the same kind
-  template <typename Ev2> gf(gf_view<Mesh, Target, Singularity, Ev2> const &g) : gf(g, bool {}) {}
+  template <typename Ev2> gf(gf_view<Mesh, Target, Singularity, Ev2> const &g) : gf(g, bool{}) {}
 
   /// From a const_gf_view of the same kind
   template <typename Ev2> gf(gf_const_view<Mesh, Target, Singularity, Ev2> const &g) : gf(g, bool {}) {}
@@ -238,12 +259,12 @@ namespace gfs {
    return *this;
   }
 
-  // other = later, cf MPI
+  // other = late, cf MPI
 
 ## ------------------------------------------------  view class ---------------------------------
 %elif GRVC == 'const_view' :
 
-  /// ---------------  Constructors --------------------
+  // ---------------  Constructors --------------------
 
   // views can not be default constructed
   gf_const_view() = delete;
@@ -255,16 +276,17 @@ namespace gfs {
   template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> &g) : gf_const_view(g, bool{}) {}                      // from a gf &
   template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> &&g) noexcept : gf_const_view(std::move(g), bool{}) {} // from a gf &&
 
-  /// Construct from mesh, data, ....
+  // Construct from mesh, data, ....
   template <typename D>
   gf_const_view(mesh_t const &m, D const &dat, singularity_t const &t, symmetry_t const &s, indices_t const &ind, std::string name = "")
      : gf_const_view(impl_tag{}, m, factory<data_t>(dat), t, s, ind, name) {}
 
-  /// ---------------  swap --------------------
+  // ---------------  swap --------------------
 
+  /// Swap
   friend void swap(gf_const_view &a, gf_const_view &b) noexcept { a.swap_impl(b); }
 
-  /// ---------------  Rebind --------------------
+  // ---------------  Rebind --------------------
   /// Rebind the view to view X
   template <typename Ev2> void rebind(gf_const_view<Mesh, Target, Singularity, Ev2> const &X) noexcept {
    this->_mesh = X._mesh;
@@ -287,7 +309,7 @@ namespace gfs {
 ## ------------------------------------------------  view class ---------------------------------
 %elif GRVC == 'view' :
 
- /// ---------------  Constructors --------------------
+  // ---------------  Constructors --------------------
 
   // views can not be default constructed
   gf_view() = delete;

@@ -19,9 +19,9 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./meshes/product.hpp"
-#include "./singularity/tail_zero.hpp"
+#include "../gf_classes.hpp"
+#include "../meshes/product.hpp"
+#include "../singularity/tail_zero.hpp"
 
 namespace triqs {
 namespace gfs {

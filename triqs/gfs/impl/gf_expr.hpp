@@ -18,10 +18,10 @@
  * TRIQS. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef TRIQS_GF_EXPR_H
-#define TRIQS_GF_EXPR_H
+#pragma once
 #include <triqs/utility/expression_template_tools.hpp>
-namespace triqs { namespace gfs {
+namespace triqs {
+namespace gfs {
 
  using utility::is_in_ZRC;
  using utility::remove_rvalue_ref;
@@ -48,10 +48,12 @@ namespace triqs { namespace gfs {
      TRIQS_RUNTIME_ERROR << "Mesh mismatch: in Green Function Expression" << l.mesh() << " vs " << r.mesh();
     return std::forward<L>(l).mesh();
    }
-   template <typename S, typename R>
-   auto operator()(scalar_wrap<S> const &, R &&r) const DECL_AND_RETURN(std::forward<R>(r).mesh());
-   template <typename S, typename L>
-   auto operator()(L &&l, scalar_wrap<S> const &) const DECL_AND_RETURN(std::forward<L>(l).mesh());
+   template <typename S, typename R> decltype(auto) operator()(scalar_wrap<S> const &, R &&r) const {
+    return std::forward<R>(r).mesh();
+   }
+   template <typename S, typename L> decltype(auto) operator()(L &&l, scalar_wrap<S> const &) const {
+    return std::forward<L>(l).mesh();
+   }
   };
 
   // Same thing to get the data shape
@@ -63,21 +65,24 @@ namespace triqs { namespace gfs {
                          << get_gf_data_shape(r);
     return get_gf_data_shape(std::forward<L>(l));
    }
-   template <typename S, typename R>
-   auto operator()(scalar_wrap<S> const &, R &&r) const DECL_AND_RETURN(get_gf_data_shape(std::forward<R>(r)));
-   template <typename S, typename L>
-   auto operator()(L &&l, scalar_wrap<S> const &) const DECL_AND_RETURN(get_gf_data_shape(std::forward<L>(l)));
+   template <typename S, typename R> decltype(auto) operator()(scalar_wrap<S> const &, R &&r) const {
+    return get_gf_data_shape(std::forward<R>(r));
+   }
+   template <typename S, typename L> decltype(auto) operator()(L &&l, scalar_wrap<S> const &) const {
+    return get_gf_data_shape(std::forward<L>(l));
+   }
   };
 
-  template <typename T> using node_t = std14::conditional_t<utility::is_in_ZRC<T>::value, scalar_wrap<T>, typename remove_rvalue_ref<T>::type>;
+  template <typename T>
+  using node_t = std14::conditional_t<utility::is_in_ZRC<T>::value, scalar_wrap<T>, typename remove_rvalue_ref<T>::type>;
 
-  template <typename A, typename B> struct _or_ {using type=void ;};
-  template <typename A> struct _or_<A,A>        {using type=A ;};
-  template <typename A> struct _or_<void,A>     {using type=A ;};
-  template <typename A> struct _or_<A,void>     {using type=A ;};
-  template <> struct _or_<void,void>            {using type=void ;};
+  template <typename A, typename B> struct _or_ { using type = void; };
+  template <typename A> struct _or_<A, A> { using type = A; };
+  template <typename A> struct _or_<void, A> { using type = A; };
+  template <typename A> struct _or_<A, void> { using type = A; };
+  template <> struct _or_<void, void> { using type = void; };
 
- }// gfs_expr_tools
+ } // gfs_expr_tools
 
  template <typename Tag, typename L, typename R> struct gf_expr : TRIQS_CONCEPT_TAG_NAME(ImmutableGreenFunction) {
   using L_t = typename std::remove_reference<L>::type;
@@ -91,22 +96,23 @@ namespace triqs { namespace gfs {
   R r;
   template <typename LL, typename RR> gf_expr(LL &&l_, RR &&r_) : l(std::forward<LL>(l_)), r(std::forward<RR>(r_)) {}
 
-  auto mesh() const DECL_AND_RETURN(gfs_expr_tools::combine_mesh()(l, r));
-  auto singularity() const DECL_AND_RETURN(utility::operation<Tag>()(l.singularity(), r.singularity()));
+  decltype(auto) mesh() const { return gfs_expr_tools::combine_mesh()(l, r); }
+  decltype(auto) singularity() const { return utility::operation<Tag>()(l.singularity(), r.singularity()); }
 
-  template <typename KeyType>
-  auto operator[](KeyType &&key) const
-      DECL_AND_RETURN(utility::operation<Tag>()(l[std::forward<KeyType>(key)], r[std::forward<KeyType>(key)]));
-  template <typename... Args>
-  auto operator()(Args &&... args) const
-      DECL_AND_RETURN(utility::operation<Tag>()(l(std::forward<Args>(args)...), r(std::forward<Args>(args)...)));
+  template <typename KeyType> decltype(auto) operator[](KeyType &&key) const {
+   return utility::operation<Tag>()(l[std::forward<KeyType>(key)], r[std::forward<KeyType>(key)]);
+  }
+  template <typename... Args> decltype(auto) operator()(Args &&... args) const {
+   return utility::operation<Tag>()(l(std::forward<Args>(args)...), r(std::forward<Args>(args)...));
+  }
   friend std::ostream &operator<<(std::ostream &sout, gf_expr const &expr) {
    return sout << "(" << expr.l << " " << utility::operation<Tag>::name << " " << expr.r << ")";
   }
  };
 
- template <typename Tag, typename L, typename R>
- auto get_gf_data_shape(gf_expr<Tag, L, R> const &g) RETURN(gfs_expr_tools::combine_shape()(g.l, g.r));
+ template <typename Tag, typename L, typename R> auto get_gf_data_shape(gf_expr<Tag, L, R> const &g) {
+  return gfs_expr_tools::combine_shape()(g.l, g.r);
+ }
 
  // -------------------------------------------------------------------
  // a special case : the unary operator !
@@ -116,34 +122,36 @@ namespace triqs { namespace gfs {
   using target_t = typename L_t::target_t;
 
   L l;
-  template<typename LL> gf_unary_m_expr(LL && l_) : l(std::forward<LL>(l_)) {}
-  
-  auto mesh() const DECL_AND_RETURN(l.mesh()); 
-  auto singularity() const DECL_AND_RETURN(l.singularity());
-  
-  template<typename KeyType> auto operator[](KeyType&& key) const DECL_AND_RETURN( -l[key]); 
-  template<typename ... Args> auto operator()(Args && ... args) const DECL_AND_RETURN( -l(std::forward<Args>(args)...));
-  friend std::ostream &operator <<(std::ostream &sout, gf_unary_m_expr const &expr){return sout << '-'<<expr.l; }
+  template <typename LL> gf_unary_m_expr(LL &&l_) : l(std::forward<LL>(l_)) {}
+
+  decltype(auto) mesh() const { return l.mesh(); }
+  decltype(auto) singularity() const { return l.singularity(); }
+
+  template <typename KeyType> auto operator[](KeyType &&key) const { return -l[key]; }
+  template <typename... Args> auto operator()(Args &&... args) const { return -l(std::forward<Args>(args)...); }
+  friend std::ostream &operator<<(std::ostream &sout, gf_unary_m_expr const &expr) { return sout << '-' << expr.l; }
  };
 
- template <typename L> AUTO_DECL get_gf_data_shape(gf_unary_m_expr<L> const &g) RETURN(get_gf_data_shape(g.l));
+ template <typename L> decltype(auto) get_gf_data_shape(gf_unary_m_expr<L> const &g) { return get_gf_data_shape(g.l); }
 
- // -------------------------------------------------------------------
- // Now we can define all the C++ operators ...
-#define DEFINE_OPERATOR(TAG, OP, TRAIT1, TRAIT2) \
- template<typename A1, typename A2>\
- std14::enable_if_t<TRAIT1<A1>::value && TRAIT2 <A2>::value, \
- gf_expr<utility::tags::TAG, gfs_expr_tools::node_t<A1>, gfs_expr_tools::node_t<A2>>>\
- operator OP (A1 && a1, A2 && a2) { return {std::forward<A1>(a1),std::forward<A2>(a2)};} 
+// -------------------------------------------------------------------
+// Now we can define all the C++ operators ...
+#define DEFINE_OPERATOR(TAG, OP, TRAIT1, TRAIT2)                                                                                 \
+ template <typename A1, typename A2>                                                                                             \
+ std14::enable_if_t<TRAIT1<A1>::value && TRAIT2<A2>::value,                                                                      \
+                    gf_expr<utility::tags::TAG, gfs_expr_tools::node_t<A1>, gfs_expr_tools::node_t<A2>>>                         \
+ operator OP(A1 &&a1, A2 &&a2) {                                                                                                 \
+  return {std::forward<A1>(a1), std::forward<A2>(a2)};                                                                           \
+ }
 
- DEFINE_OPERATOR(plus,       +, ImmutableGreenFunction,ImmutableGreenFunction);
- DEFINE_OPERATOR(minus,      -, ImmutableGreenFunction,ImmutableGreenFunction);
- DEFINE_OPERATOR(multiplies, *, ImmutableGreenFunction,ImmutableGreenFunction);
- DEFINE_OPERATOR(multiplies, *, is_in_ZRC,ImmutableGreenFunction);
- DEFINE_OPERATOR(multiplies, *, ImmutableGreenFunction,is_in_ZRC);
- DEFINE_OPERATOR(divides,    /, ImmutableGreenFunction,ImmutableGreenFunction);
- DEFINE_OPERATOR(divides,    /, is_in_ZRC,ImmutableGreenFunction);
- DEFINE_OPERATOR(divides,    /, ImmutableGreenFunction,is_in_ZRC);
+ DEFINE_OPERATOR(plus, +, ImmutableGreenFunction, ImmutableGreenFunction);
+ DEFINE_OPERATOR(minus, -, ImmutableGreenFunction, ImmutableGreenFunction);
+ DEFINE_OPERATOR(multiplies, *, ImmutableGreenFunction, ImmutableGreenFunction);
+ DEFINE_OPERATOR(multiplies, *, is_in_ZRC, ImmutableGreenFunction);
+ DEFINE_OPERATOR(multiplies, *, ImmutableGreenFunction, is_in_ZRC);
+ DEFINE_OPERATOR(divides, /, ImmutableGreenFunction, ImmutableGreenFunction);
+ DEFINE_OPERATOR(divides, /, is_in_ZRC, ImmutableGreenFunction);
+ DEFINE_OPERATOR(divides, /, ImmutableGreenFunction, is_in_ZRC);
 #undef DEFINE_OPERATOR
 
  // the unary is special
@@ -156,12 +164,12 @@ namespace triqs { namespace gfs {
 // we implement them trivially.
 
 #define DEFINE_OPERATOR(OP1, OP2)                                                                                                \
- template <typename Mesh, typename Target, typename Evaluator, typename T>                                                   \
- void operator OP1(gf_view<Mesh, Target, Evaluator> g, T const &x) {                                                         \
+ template <typename Mesh, typename Target, typename Evaluator, typename T>                                                       \
+ void operator OP1(gf_view<Mesh, Target, Evaluator> g, T const &x) {                                                             \
   g = g OP2 x;                                                                                                                   \
  }                                                                                                                               \
- template <typename Mesh, typename Target, typename Evaluator, typename T>                                                   \
- void operator OP1(gf<Mesh, Target, Evaluator> &g, T const &x) {                                                             \
+ template <typename Mesh, typename Target, typename Evaluator, typename T>                                                       \
+ void operator OP1(gf<Mesh, Target, Evaluator> &g, T const &x) {                                                                 \
   g = g OP2 x;                                                                                                                   \
  }
 
@@ -171,8 +179,6 @@ namespace triqs { namespace gfs {
  DEFINE_OPERATOR(/=, / );
 
 #undef DEFINE_OPERATOR
-
-}}//namespace triqs::gf
-#endif
-
+}
+} // namespace triqs::gf
 

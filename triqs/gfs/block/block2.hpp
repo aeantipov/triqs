@@ -19,8 +19,8 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./meshes/discrete.hpp"
+#include "../gf_classes.hpp"
+#include "../meshes/discrete.hpp"
 #include <iterator>
 
 namespace triqs {

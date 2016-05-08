@@ -20,8 +20,8 @@
  ******************************************************************************/
 #pragma once
 #include <triqs/arrays.hpp>
-#include "./gf_classes.hpp"
-#include "./meshes/matsubara_freq.hpp"
+#include "../gf_classes.hpp"
+#include "../meshes/matsubara_freq.hpp"
 namespace triqs {
 namespace gfs {
 
@@ -143,9 +143,9 @@ namespace gfs {
   using r_t = typename Target::value_type;
   using rv_t = typename const_view_type_if_exists_else_type< typename Target::value_type>::type;
 
-  template <typename S> auto _evaluate_sing(matrix_valued, S const &s, matsubara_freq const &f) const RETURN(evaluate(s, f));
+  template <typename S> auto _evaluate_sing(matrix_valued, S const &s, matsubara_freq const &f) const {return evaluate(s, f);}
   template <typename S>
-  auto _evaluate_sing(scalar_valued, S const &s, matsubara_freq const &f) const RETURN(evaluate(s, f)(0, 0));
+  auto _evaluate_sing(scalar_valued, S const &s, matsubara_freq const &f) const {return evaluate(s, f)(0, 0);}
   rv_t _evaluate_sing(Target, nothing, matsubara_freq const &f) const {
    TRIQS_RUNTIME_ERROR << "Evaluation out of mesh";
    return r_t{};
@@ -167,7 +167,7 @@ namespace gfs {
 
   // int -> replace by matsubara_freq
   template <typename G>
-  AUTO_DECL operator()(G const &g, int n) const RETURN(g(matsubara_freq(n, g.mesh().domain().beta, g.mesh().domain().statistic)));
+  decltype(auto) operator()(G const &g, int n) const {return g(matsubara_freq(n, g.mesh().domain().beta, g.mesh().domain().statistic));}
 
   // Evaluate on the tail : compose the tails
   template <typename G> typename G::singularity_t operator()(G const &g, tail_view t) const {

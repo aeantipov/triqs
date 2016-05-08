@@ -19,6 +19,7 @@
  *
  ******************************************************************************/
 #pragma once
+#include <iterator>
 
 namespace triqs {
 namespace gfs {

@@ -19,8 +19,8 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./meshes/matsubara_time.hpp"
+#include "../gf_classes.hpp"
+#include "../meshes/matsubara_time.hpp"
 
 namespace triqs {
 namespace gfs {

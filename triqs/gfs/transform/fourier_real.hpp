@@ -20,8 +20,8 @@
  ******************************************************************************/
 #pragma once
 #include "fourier_base.hpp"
-#include <triqs/gfs/refreq.hpp> 
-#include <triqs/gfs/retime.hpp> 
+#include <triqs/gfs/onevar/refreq.hpp> 
+#include <triqs/gfs/onevar/retime.hpp> 
 
 namespace triqs { namespace gfs {
 

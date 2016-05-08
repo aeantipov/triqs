@@ -20,8 +20,8 @@
  ******************************************************************************/
 #pragma once
 #include "fourier_base.hpp"
-#include "../bz.hpp" 
-#include "../cyclic_lattice.hpp"
+#include "../onevar/bz.hpp" 
+#include "../onevar/cyclic_lattice.hpp"
 
 namespace triqs {
 namespace gfs {

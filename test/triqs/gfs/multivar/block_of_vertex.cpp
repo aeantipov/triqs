@@ -20,7 +20,6 @@
  ******************************************************************************/
 
 #include <triqs/test_tools/gfs.hpp>
-#include <triqs/gfs/block.hpp>
 
 using namespace triqs::clef;
 using namespace triqs::lattice;

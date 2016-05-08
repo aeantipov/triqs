@@ -18,38 +18,34 @@
  * TRIQS. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef TRIQS_GFS_ALL_H
-#define TRIQS_GFS_ALL_H
+#pragma once
 
 #define TRIQS_GF_INCLUDED
 
 #include "./gfs/gf_classes.hpp"
 
-#include <triqs/gfs/imtime.hpp>
-#include <triqs/gfs/imfreq.hpp>
-#include <triqs/gfs/retime.hpp>
-#include <triqs/gfs/refreq.hpp>
-#include <triqs/gfs/legendre.hpp>
-#include <triqs/gfs/bz.hpp>
-#include <triqs/gfs/cyclic_lattice.hpp>
+#include <triqs/gfs/onevar/imtime.hpp>
+#include <triqs/gfs/onevar/imfreq.hpp>
+#include <triqs/gfs/onevar/retime.hpp>
+#include <triqs/gfs/onevar/refreq.hpp>
+#include <triqs/gfs/onevar/legendre.hpp>
+#include <triqs/gfs/onevar/bz.hpp>
+#include <triqs/gfs/onevar/cyclic_lattice.hpp>
 
-// multivariable gf in C++14 only
-#ifndef TRIQS_C11
-#include <triqs/gfs/product.hpp>
-#include <triqs/gfs/curry.hpp>
+// multivar 
+#include <triqs/gfs/multivar/product.hpp>
+#include <triqs/gfs/multivar/curry.hpp>
 #include <triqs/gfs/singularity/m_tail.hpp>
-#endif
 
-#include <triqs/gfs/block.hpp>
-#ifndef TRIQS_C11
-#include <triqs/gfs/block2.hpp>
-#endif
-#include <triqs/gfs/impl/map.hpp>
-#include <triqs/gfs/impl/block_gf_iterator.hpp>
+#include <triqs/gfs/block/block.hpp>
+#include <triqs/gfs/block/block2.hpp>
+#include <triqs/gfs/block/block_gf_iterator.hpp>
+#include <triqs/gfs/block/map.hpp>
+#include <triqs/gfs/block/mapped_functions.hpp>
 
 #include <triqs/gfs/transform/fourier_matsubara.hpp>
 #include <triqs/gfs/transform/fourier_real.hpp>
 #include <triqs/gfs/transform/fourier_lattice.hpp>
 #include <triqs/gfs/transform/legendre_matsubara.hpp>
-#endif
+
 

@@ -1,8 +1,10 @@
-/*******************************************************************************
+/* vim: set filetype=cpp: */
+## mapped_functions.hpp               
+#/*******************************************************************************
  *
  * TRIQS: a Toolbox for Research in Interacting Quantum Systems
  *
- * Copyright (C) 2012 by M. Ferrero, O. Parcollet
+ * Copyright (C) 2015-2016 by O. Parcollet
  *
  * TRIQS is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -18,16 +20,24 @@
  * TRIQS. If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-#ifndef TRIQS_GF_LOCAL_PADE_H
-#define TRIQS_GF_LOCAL_PADE_H
+#pragma once
+#include <triqs/gfs/block/map.hpp>
 
-#include "../gf_classes.hpp"
-#include "../onevar/imfreq.hpp"
-#include "../onevar/refreq.hpp"
+namespace triqs {
+namespace gfs {
 
-namespace triqs { namespace gfs {
+ %for FntToMap in ['inverse', 'reinterpret_scalar_valued_gf_as_matrix_valued'] : 
 
-  void pade (gf_view<refreq> &gr, gf_view<imfreq> const &gw, int n_points, double freq_offset);
+ %for BGF in ['block_gf<M,T> &' , 'block_gf<M,T> const &' , 'block_gf_view<M,T>', 'block_gf_const_view<M,T>'] : 
 
-}}
-#endif
+ template <typename M, typename T> auto ${FntToMap}(${BGF} g) { 
+   auto l= [](auto&&x) { return ${FntToMap}(x);};
+   return map_block_gf(l, g);   
+ }
+
+%endfor
+%endfor
+
+}
+}
+

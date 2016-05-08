@@ -19,9 +19,9 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./domains/R.hpp"
-#include "../lattice/regular_bz_mesh.hpp"
+#include "../gf_classes.hpp"
+#include "../domains/R.hpp"
+#include "../../lattice/regular_bz_mesh.hpp"
 
 namespace triqs {
 namespace gfs {

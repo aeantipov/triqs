@@ -20,8 +20,8 @@
  ******************************************************************************/
 #pragma once
 #include "./fourier_base.hpp"
-#include "../imfreq.hpp"
-#include "../imtime.hpp"
+#include "../onevar/imfreq.hpp"
+#include "../onevar/imtime.hpp"
 
 namespace triqs {
 namespace gfs {

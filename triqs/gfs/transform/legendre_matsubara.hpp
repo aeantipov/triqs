@@ -22,9 +22,9 @@
 #define TRIQS_GF_LOCAL_LEGENDRE_MATSU_H
 
 #include "../gf_classes.hpp"
-#include "../imfreq.hpp"
-#include "../imtime.hpp"
-#include "../legendre.hpp"
+#include "../onevar/imfreq.hpp"
+#include "../onevar/imtime.hpp"
+#include "../onevar/legendre.hpp"
 
 namespace triqs {
 namespace gfs {

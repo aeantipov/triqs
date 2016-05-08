@@ -19,9 +19,9 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./domains/legendre.hpp"
-#include "./meshes/discrete.hpp"
+#include "../gf_classes.hpp"
+#include "../domains/legendre.hpp"
+#include "../meshes/discrete.hpp"
 
 namespace triqs {
 namespace gfs {

@@ -19,8 +19,8 @@
  *
  ******************************************************************************/
 #pragma once
-#include "./gf_classes.hpp"
-#include "./meshes/segment.hpp"
+#include "../gf_classes.hpp"
+#include "../meshes/segment.hpp"
 
 namespace triqs {
 namespace gfs {
