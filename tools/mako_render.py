@@ -15,7 +15,9 @@ lines = fi.split('\n')
 for l in lines:
     if l.strip().startswith(r'/*') : continue
     if not l.strip().startswith('## ') : break
-    _, fo, varlist = l.strip().split(' ',2)
+    ll =  l.strip().split(' ',2)
+    if len (ll) <=2 : ll.append('') 
+    _, fo, varlist = ll
     varlist_split = varlist.split(';')
     varlist = dict ( [ map(lambda x: x.strip(), x.split('=')) for x in varlist_split if x])
     try : 

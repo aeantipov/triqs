@@ -103,7 +103,7 @@ namespace triqs { namespace gfs {
    }
   }
 
-  void fit_tail(gf_view<block_index, gf<imfreq>> block_gf, tail_view known_moments, int max_moment, int n_min,
+  void fit_tail(block_gf_view<imfreq> block_gf, tail_view known_moments, int max_moment, int n_min,
     int n_max, bool replace_by_fit ) {
    // for(auto &gf : block_gf) fit_tail(gf, known_moments, max_moment, n_min, n_max, replace_by_fit);
    for (int i = 0; i < block_gf.mesh().size(); i++)
