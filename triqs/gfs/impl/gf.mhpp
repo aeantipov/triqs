@@ -238,20 +238,34 @@ namespace gfs {
 
   /// ---------------  Operator = --------------------
 
+  /// Copy assignment
   gf &operator=(gf const &rhs) { return *this = gf(rhs); } // use move =
+  //
   gf &operator=(gf &rhs) { return *this = gf(rhs); }       // use move =
-
+  /// Move assignment	
   gf &operator=(gf &&rhs) noexcept {
    this->swap_impl(rhs);
    return *this;
   }
 
-  // NB template is lower priority than the previous one when RHS is gf ...
+  /** 
+   * Assignment operator
+   *
+   * @tparam RHS Type of the right hand side rhs
+   *
+   * 		 RHS can be anything modeling the gf concept TBW
+   * 		 In particular lazy expression with Green functions	
+   * @param rhs  
+   * @example    gf_assign_0
+   *
+   * The assignment resizes the mesh and the data, invalidating all pointers on them.
+   *    
+   */
   template <typename RHS> gf & operator=(RHS &&rhs) {
-   this->_mesh = rhs.mesh();
-   this->_data.resize(get_gf_data_shape(rhs));
-   for (auto const &w : this->mesh()) (*this)[w] = rhs[w];
-   this->_singularity = rhs.singularity();
+   _mesh = rhs.mesh();
+   _data.resize(get_gf_data_shape(rhs));
+   for (auto const &w : _mesh) (*this)[w] = rhs[w];
+   _singularity = rhs.singularity();
    // to be implemented : there is none in the gf_expr in particular....
    // this->_symmetry = rhs.symmetry();
    // indices and name are not affected by it ???
@@ -269,10 +283,16 @@ namespace gfs {
   gf_const_view() = delete;
 
   // Allow to construct a view from a gf with a different evaluator
-  template <typename Ev2> gf_const_view(gf_const_view<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}     // from a const_view
-  template <typename Ev2> gf_const_view(gf_view<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}           // from a view
-  template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}                // from a const gf
+  
+  /// Makes a const view
+  template <typename Ev2> gf_const_view(gf_const_view<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}    
+  /// Makes a const view
+  template <typename Ev2> gf_const_view(gf_view<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}          
+  /// Makes a const view
+  template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> const &g) : gf_const_view(g, bool{}) {}                
+  /// Makes a const view
   template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> &g) : gf_const_view(g, bool{}) {}                      // from a gf &
+  /// Makes a const view
   template <typename Ev2> gf_const_view(gf<Mesh, Target, Singularity, Ev2> &&g) noexcept : gf_const_view(std::move(g), bool{}) {} // from a gf &&
 
   // Construct from mesh, data, ....
@@ -286,7 +306,7 @@ namespace gfs {
   friend void swap(gf_const_view &a, gf_const_view &b) noexcept { a.swap_impl(b); }
 
   // ---------------  Rebind --------------------
-  /// Rebind the view to view X
+  /// Rebind the view 
   template <typename Ev2> void rebind(gf_const_view<Mesh, Target, Singularity, Ev2> const &X) noexcept {
    this->_mesh = X._mesh;
    this->_symmetry = X._symmetry;
@@ -297,12 +317,12 @@ namespace gfs {
    this->_evaluator = evaluator_t{this}; // reconstruct the evaluator in case it has some state...
   }
 
-  /// Rebind on a const view
+  /// Rebind on a non const view
   template <typename Ev2> void rebind(gf_view<Mesh, Target, Singularity, Ev2> const &X) noexcept {
    rebind(gf_const_view{X});
   }
 
-  /// ---------------  No = since it is const ... --------------------
+  // ---------------  No = since it is const ... --------------------
   gf_const_view &operator=(gf_const_view const &) = delete; // a const view can not be assigned to
 
 ## ------------------------------------------------  view class ---------------------------------
@@ -314,24 +334,29 @@ namespace gfs {
   gf_view() = delete;
 
   // Allow to construct a view from a gf with a different evaluator, except const_views ...
+  /// Makes a view
   template <typename Ev2> gf_view(gf_const_view<Mesh, Target, Singularity, Ev2> const &g) = delete;          // from a const_view
+  /// Makes a view
   template <typename Ev2> gf_view(gf_view<Mesh, Target, Singularity, Ev2> const &g) : gf_view(g, bool{}) {}  // from a view
+  /// Makes a view
   template <typename Ev2> gf_view(gf<Mesh, Target, Singularity, Ev2> const &g) = delete;                     // from a const gf
+  /// Makes a view
   template <typename Ev2> gf_view(gf<Mesh, Target, Singularity, Ev2> &g) : gf_view(g, bool{}) {}             // from a gf &
+  /// Makes a view
   template <typename Ev2> gf_view(gf<Mesh, Target, Singularity, Ev2> &&g) noexcept : gf_view(std::move(g), bool{}) {} // from a gf &&
 
-  /// Construct from mesh, data, ....
+  // Construct from mesh, data, ....
   template <typename D>
   gf_view(mesh_t const &m, D &&dat, singularity_t const &t, symmetry_t const &s, indices_t const &ind = indices_t{},
           std::string name = "")
      : gf_view(impl_tag{}, m, factory<data_t>(std::forward<D>(dat)), t, s, ind, name) {}
 
-  /// ---------------  swap --------------------
-
+  // ---------------  swap --------------------
+  /// Swap
   friend void swap(gf_view &a, gf_view &b) noexcept { a.swap_impl(b); }
 
-  /// ---------------  Rebind --------------------
-  //
+  // ---------------  Rebind --------------------
+  /// Rebind
   template <typename Ev2> void rebind(gf_view<Mesh, Target, Singularity, Ev2> const &X) noexcept {
    this->_mesh = X._mesh;
    this->_symmetry = X._symmetry;
@@ -342,12 +367,18 @@ namespace gfs {
    this->_evaluator = evaluator_t{this}; // reconstruct the evaluator in case it has some state...
   }
 
-  /// ---------------  operator =  --------------------
+  // ---------------  operator =  --------------------
+  /// Copy the data, without resizing the view. 
   gf_view &operator=(gf_view const &rhs) {
    triqs_gf_view_assign_delegation(*this, rhs);
    return *this;
   }
 
+  /**
+   * Assignment
+   *
+   * @tparam RHS WRITE A LIST OF POSSIBLES ...
+   */
   template <typename RHS> gf_view &operator=(RHS const &rhs) {
    triqs_gf_view_assign_delegation(*this, rhs);
    return *this;
@@ -360,13 +391,15 @@ namespace gfs {
   // ------------- All the call operators without lazy arguments -----------------------------
 
   // First, a simple () returns a view, like for an array...
+  /// Makes a const view of *this
   const_view_type operator()() const { return *this; }
+  /// Makes a view of *this if it is non const
   view_type operator()() { return *this; }
 
 <%block name="non_lazy_call">
 
-  /// Calls are (perfectly) forwarded to the evaluator::operator(), except mesh_point_t and when
-  /// there is at least one lazy argument ...
+  // Calls are (perfectly) forwarded to the evaluator::operator(), except mesh_point_t and when
+  // there is at least one lazy argument ...
   template <typename... Args> // match any argument list, picking out the first type : () is not permitted
   typename boost::lazy_disable_if_c< // disable the template if one the following conditions it true
       (sizeof...(Args) == 0) || clef::is_any_lazy<Args...>::value ||
@@ -381,7 +414,7 @@ namespace gfs {
 
   // ------------- Call with lazy arguments -----------------------------
 
-  /// Calls with at least one lazy argument : we make a clef expression, cf clef documentation
+  // Calls with at least one lazy argument : we make a clef expression, cf clef documentation
   template <typename... Args> clef::make_expr_call_t<self_t &, Args...> operator()(Args &&... args) & {
    return clef::make_expr_call(*this, std::forward<Args>(args)...);
   }
@@ -401,11 +434,11 @@ namespace gfs {
   using r_type = std14::result_of_t<data_proxy_t(data_t &, typename mesh_t::linear_index_t)>;
   using cr_type = std14::result_of_t<data_proxy_t(data_t const &, typename mesh_t::linear_index_t)>;
 
-  /// pass a index_t of the mesh
+  // pass a index_t of the mesh
   r_type operator[](mesh_index_t const &arg) { return _data_proxy(_data, _mesh.index_to_linear(arg)); }
   cr_type operator[](mesh_index_t const &arg) const { return _data_proxy(_data, _mesh.index_to_linear(arg)); }
 
-  /// pass a mesh_point of the mesh
+  // pass a mesh_point of the mesh
   r_type operator[](mesh_point_t const &x) {
 #ifdef TRIQS_DEBUG
    if (this->_mesh != x.mesh()) TRIQS_RUNTIME_ERROR << "gf[ ] : mesh point's mesh and gf's mesh mismatch";
@@ -420,7 +453,7 @@ namespace gfs {
    return _data_proxy(_data, x.linear_index());
   }
 
-  /// pass an abtract closest_point. We extract the value of the domain from p, call the gf_closest_point trait
+  // pass an abtract closest_point. We extract the value of the domain from p, call the gf_closest_point trait
   template <typename... U> r_type operator[](closest_pt_wrap<U...> const &p) {
    return _data_proxy(
        _data,
@@ -447,7 +480,7 @@ namespace gfs {
    return clef::make_expr_subscript(std::move(*this), std::forward<Arg>(arg));
   }
 
-  /// --------------------- A direct access to the grid point --------------------------
+  // --------------------- A direct access to the grid point --------------------------
 
   template <typename... Args> r_type get_from_linear_index(Args &&... args) {
    return _data_proxy(_data, linear_mesh_index_t(std::forward<Args>(args)...));
@@ -465,7 +498,7 @@ namespace gfs {
    return _data_proxy(_data, _mesh.index_to_linear(mesh_index_t(std::forward<Args>(args)...)));
   }
 
-  /// --------------------- on mesh (g) : the call before [] -------------------------
+  // --------------------- on mesh (g) : the call before [] -------------------------
   // This is a workaround the the lack of multi argument [] in C++
 
   // mesh points should be treated slighly differently : take their index....
@@ -503,6 +536,7 @@ namespace gfs {
 
   //----------------------------- HDF5 -----------------------------
 
+  /// HDF5 name
   friend std::string get_triqs_hdf5_data_scheme(self_t const &g) {
    auto s = gf_h5_name<Mesh, Target, Singularity>::invoke();
    return (s == "BlockGf" ? s : "Gf" + s);
@@ -533,6 +567,7 @@ namespace gfs {
 
   //-----------------------------  BOOST Serialization -----------------------------
   friend class boost::serialization::access;
+  /// The serialization as required by Boost 
   template <class Archive> void serialize(Archive &ar, const unsigned int version) {
    ar &TRIQS_MAKE_NVP("data", _data);
    ar &TRIQS_MAKE_NVP("singularity", _singularity);
@@ -544,37 +579,70 @@ namespace gfs {
 
   //----------------------------- print  -----------------------------
 
+  /// IO
   friend std::ostream &operator<<(std::ostream &out, self_t const &x) { return out << "self_t"; }
 
   //----------------------------- MPI  -----------------------------
 
-  friend void mpi_broadcast(self_t &g, mpi::communicator c = {}, int root = 0) {
+<%def name="mpidoc(OP)">
+ /**
+   * Initiate (lazy) MPI ${OP}
+   *
+   * When the returned object is used at the RHS of operator = or in a constructor of a gf,
+   * the MPI ${OP} operation is performed.
+   *
+   * @group MPI
+   * @param g The ${GF}
+   * @param c The MPI communicator (default is world)
+   * @param root The root of the broadcast communication in the MPI sense.
+   * @return Returns a lazy object describing the object and the MPI operation to be performed.
+   *
+   */
+</%def>
+ 
+  ${mpidoc("Bcast")}
+  friend void mpi_broadcast(self_t & g, mpi::communicator c = {}, int root = 0) {
    // Shall we bcast mesh ?
    mpi_broadcast(g.data(), c, root);
    mpi_broadcast(g.singularity(), c, root);
   }
 
+  ${mpidoc("Reduce")}
   friend mpi_lazy<mpi::tag::reduce, const_view_type> mpi_reduce(self_t const &a, mpi::communicator c = {}, int root = 0,
                                                                 bool all = false, MPI_Op op = MPI_SUM) {
    return {a(), c, root, all, op};
   }
+
+  ${mpidoc("AllReduce")}
   friend mpi_lazy<mpi::tag::reduce, const_view_type> mpi_all_reduce(self_t const &a, mpi::communicator c = {}, int root = 0,
                                                                     MPI_Op op = MPI_SUM) {
    return {a(), c, root, true, op};
   }
+
+  ${mpidoc("Scatter")}
   friend mpi_lazy<mpi::tag::scatter, const_view_type> mpi_scatter(self_t const &a, mpi::communicator c = {}, int root = 0) {
    return {a(), c, root, true};
   }
-  friend mpi_lazy<mpi::tag::gather, const_view_type> mpi_gather(self_t const &a, mpi::communicator c = {}, int root = 0, bool all = false) {
+
+  ${mpidoc("Gather")}
+  friend mpi_lazy<mpi::tag::gather, const_view_type> mpi_gather(self_t const &a, mpi::communicator c = {}, int root = 0,
+                                                                bool all = false) {
    return {a(), c, root, all};
   }
+
+  ${mpidoc("AllGather")}
   friend mpi_lazy<mpi::tag::gather, const_view_type> mpi_all_gather(self_t const &a, mpi::communicator c = {}, int root = 0) {
    return {a(), c, root, true};
   }
 
 %if GRVC != "const_view":
-
-  //---- reduce ----
+ 
+  //-------------  corresponding operator = overload 
+ 
+  /** 
+   * Performs MPI reduce
+   * @param l The lazy object returned by mpi_reduce
+   */
   template <typename E>
   void operator=(mpi_lazy<mpi::tag::reduce, gf_const_view<Mesh, Target, Singularity, E>> l) {
    _mesh = l.rhs.mesh();
@@ -582,7 +650,10 @@ namespace gfs {
    _singularity = mpi_reduce(l.rhs.singularity(), l.c, l.root, l.all, l.op);
   }
 
-  //---- scatter ----
+ /** 
+   * Performs MPI scatter
+   * @param l The lazy object returned by mpi_reduce
+   */
   template <typename E>
   void operator=(mpi_lazy<mpi::tag::scatter, gf_const_view<Mesh, Target, Singularity, E>> l) {
    _mesh = mpi_scatter(l.rhs.mesh(), l.c, l.root);
@@ -591,7 +662,10 @@ namespace gfs {
    mpi_broadcast(_singularity, l.c, l.root);
   }
 
-  //---- gather ----
+ /** 
+   * Performs MPI gather
+   * @param l The lazy object returned by mpi_reduce
+   */
   template <typename E>
   void operator=(mpi_lazy<mpi::tag::gather, gf_const_view<Mesh, Target, Singularity, E>> l) {
    _mesh = mpi_gather(l.rhs.mesh(), l.c, l.root);
