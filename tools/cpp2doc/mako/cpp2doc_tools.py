@@ -78,6 +78,7 @@ def prepare_example(filename, decal):
     """From the filename, prepare the doc1, doc2, before and after the code
        and compute the lineno of the code for inclusion"""
     filename += ".cpp"
+    #if not os.path.exists(filename) : filename = '/
     if not os.path.exists(filename) :
         #print "example file %s (in %s) does not exist"%(filename,os.getcwd())
         return None, None, None, 0, 0

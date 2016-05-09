@@ -135,10 +135,12 @@ class Function(object):
                     if ch.kind in [CursorKind.INTEGER_LITERAL, CursorKind.FLOATING_LITERAL,
                                    CursorKind.CHARACTER_LITERAL, CursorKind.STRING_LITERAL,
                                    CursorKind.UNARY_OPERATOR, CursorKind.UNEXPOSED_EXPR,
-                                   CursorKind.CXX_BOOL_LITERAL_EXPR ] :
-                        #print [x.spelling for x in ch.get_tokens()]
+                                   CursorKind.CXX_BOOL_LITERAL_EXPR, CursorKind.CALL_EXPR ] :
                         #default_value =  ch.get_tokens().next().spelling
                         default_value =  ''.join([x.spelling for x in ch.get_tokens()][:-1])
+                        # if the default value is a = A{} or = {}, need to clean
+                        # the = in front of it (why ??).
+                        default_value = default_value.strip(' =')
                 t = type_(c.type)
 
                 # We look if this argument is a parameter class...
