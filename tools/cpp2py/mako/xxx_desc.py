@@ -40,7 +40,6 @@
     used_module_list, converters_list = [], set()
     def analyse(t) :
         if t is None :return
-        #global used_module_list
         for ns, mod in recognized_namespace_for_using.items() :
           if decay(t.canonical_name).startswith(ns) :
             used_module_list.append(mod)
