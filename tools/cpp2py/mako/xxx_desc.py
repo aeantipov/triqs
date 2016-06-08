@@ -31,7 +31,10 @@
         'std::function' : 'function',
         'std::pair' : 'pair',
         'std::tuple' : 'tuple',
-        'triqs::utility::variant' : 'variant'
+        'triqs::utility::variant' : 'variant',
+        'triqs::arrays::array' : 'arrays',
+        'triqs::arrays::matrix' : 'arrays',
+        'triqs::arrays::vector' : 'arrays',
         }
 
     used_module_list, converters_list = [], set()
