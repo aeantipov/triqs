@@ -119,6 +119,10 @@ class TriqsMagics(Magics):
                 f.write(cmakelist)
 
             with open('ext.cpp', 'w') as f:
+                f.write("""
+#include <triqs/utility/cpp2py_macros.hpp>
+#include <triqs/python_tools/py_stream.hpp>
+                """)
                 f.write(code)
 
             def execute(command, message):

@@ -90,7 +90,17 @@ if __name__ == '__main__' :
                analyze_filter = analyze_filter)
   
     print "Parsing C++ code. Generating the wrapper and converters ..."
-
+ 
+    #filter out classes with some conditions        
+    exclude=[]
+    for c in classes :
+      if c.is_template or "ignore_in_python" in c.annotations:
+         exclude.append(c)
+      #if not c.constructors: # if no constructor, assume the default one 
+      #       c.add_constructor("""()""", doc = """ """)
+          
+    classes=[c for c in classes if c not in exclude]
+ 
     if args.properties :    
         print "Transforming no argument accessors into Python properties"
 
@@ -129,7 +139,7 @@ if __name__ == '__main__' :
       
     
     # all classes used as parameters needs to be converted from / to Python
-    classes_of_parameters = [m.parameter_arg for m in sum((c.methods for c in classes),[]) if m.parameter_arg != None]
+    classes_of_parameters = [f.parameter_arg for f in functions + sum((c.methods for c in classes),[]) if f.parameter_arg != None]
     classes_of_parameters_from_constr = [m.parameter_arg for m in sum((c.constructors for c in classes),[]) if m.parameter_arg != None]
     classes_of_parameters.extend(classes_of_parameters_from_constr)
     classes_of_parameters = dict(((c.name,c) for c in classes_of_parameters)).values() # make unique
